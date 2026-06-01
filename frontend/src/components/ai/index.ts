@@ -1,4 +1,11 @@
 export { default as PDFUploader } from './PDFUploader';
 export { default as SummaryDisplay } from './SummaryDisplay';
 export { default as SummaryHistory } from './SummaryHistory';
+export { default as ProposalForm } from './ProposalForm';
+export { default as ProposalViewer } from './ProposalViewer';
+export { default as ProposalCard } from './ProposalCard';
+export { default as PricingSuggestionCard } from './PricingSuggestionCard';
+export { default as TemplateSelector } from './TemplateSelector';
+export { default as AIResponsePanel } from './AIResponsePanel';
+export { default as ProposalHistoryTable } from './ProposalHistoryTable';
 export { default as AIAlert } from './AIAlert';

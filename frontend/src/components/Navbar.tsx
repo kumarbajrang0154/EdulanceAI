@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import NotificationBell from './NotificationBell';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -13,8 +14,12 @@ const Navbar = () => {
         <nav className="flex items-center gap-4 text-sm text-slate-600">
           {user ? (
             <>
+              <NotificationBell />
               <Link to="/dashboard" className="hover:text-slate-900">
                 Dashboard
+              </Link>
+              <Link to="/marketplace" className="hover:text-slate-900">
+                Marketplace
               </Link>
               <button
                 type="button"

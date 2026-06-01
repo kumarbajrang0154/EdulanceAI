@@ -2,6 +2,8 @@ import Note from '../models/Note.js';
 import User from '../models/User.js';
 import PDFService from '../services/pdfService.js';
 import { AIService } from '../services/aiService.js';
+import { createNotification } from '../services/notificationService.js';
+import { logActivity } from '../services/activityService.js';
 
 // Upload PDF and generate summary
 export const uploadAndSummarize = async (req, res) => {
@@ -62,6 +64,22 @@ export const uploadAndSummarize = async (req, res) => {
       req.user.id,
       { $inc: { 'stats.aiUsageCount': 1 } }
     );
+
+    await Promise.all([
+      createNotification({
+        userId: req.user.id,
+        type: 'success',
+        title: 'AI summary completed',
+        message: 'Your uploaded document has been processed and the summary is ready.',
+        category: 'ai',
+        targetUrl: '/student/summary-history',
+      }),
+      logActivity({
+        userId: req.user.id,
+        activityType: 'ai_summary_generated',
+        metadata: { noteId: savedNote._id, textLength: savedNote.textLength },
+      }),
+    ]);
 
     // Clean up temporary file
     PDFService.deleteFile(req.file.path);

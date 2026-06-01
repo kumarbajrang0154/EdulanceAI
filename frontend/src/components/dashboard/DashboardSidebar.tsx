@@ -13,12 +13,18 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { label: 'Dashboard', path: '/student/dashboard', icon: '📊' },
+  { label: 'Marketplace', path: '/marketplace', icon: '🛒' },
+  { label: 'My Requests', path: '/requests/user', icon: '📩' },
   { label: 'AI Notes Summary', path: '/student/ai-notes', icon: '✨' },
   { label: 'Summary History', path: '/student/summary-history', icon: '📚' },
   { label: 'Resume Builder', path: '/student/resume', icon: '📄' },
   { label: 'Placement Prep', path: '/student/placement', icon: '🎯' },
   { label: 'Video Learning', path: '/student/videos', icon: '🎬' },
   { label: 'Saved Resources', path: '/student/resources', icon: '💾' },
+  { label: 'Notifications', path: '/notifications', icon: '🔔' },
+  { label: 'Activity', path: '/activity', icon: '📝' },
+  { label: 'Feedback Center', path: '/feedback-center', icon: '📣' },
+  { label: 'Reviews', path: '/reviews', icon: '⭐' },
   { label: 'Settings', path: '/student/settings', icon: '⚙️' },
 ];
 
