@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom';
+import { Outlet, Route, Routes } from 'react-router-dom';
 import Layout from '../components/Layout';
 import ProtectedRoute from '../components/ProtectedRoute';
 import Dashboard from '../pages/Dashboard';
@@ -6,7 +6,6 @@ import Landing from '../pages/Landing';
 import Login from '../pages/Login';
 import Signup from '../pages/Signup';
 import Unauthorized from '../pages/Unauthorized';
-import StudentDashboard from '../pages/StudentDashboard';
 import AdminDashboard from '../pages/AdminDashboard';
 import StudentDashboardHome from '../pages/StudentDashboardHome';
 import AINotesPage from '../pages/AINotesPage';
@@ -64,82 +63,21 @@ const AppRoutes = () => (
       path="/student"
       element={
         <ProtectedRoute allowedRoles={['student']}>
-          <StudentDashboard />
+          <Outlet />
         </ProtectedRoute>
       }
-    />
-    <Route
-      path="/student/dashboard"
-      element={
-        <ProtectedRoute allowedRoles={['student']}>
-          <StudentDashboardHome />
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/student/ai-notes"
-      element={
-        <ProtectedRoute allowedRoles={['student']}>
-          <AINotesPage />
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/student/summary-history"
-      element={
-        <ProtectedRoute allowedRoles={['student']}>
-          <SummaryHistoryPage />
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/student/ai-tools"
-      element={
-        <ProtectedRoute allowedRoles={['student']}>
-          <AIToolsPage />
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/student/resume"
-      element={
-        <ProtectedRoute allowedRoles={['student']}>
-          <ResumeBuilderPage />
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/student/placement"
-      element={
-        <ProtectedRoute allowedRoles={['student']}>
-          <PlacementPrepPage />
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/student/videos"
-      element={
-        <ProtectedRoute allowedRoles={['student']}>
-          <VideoLearningPage />
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/student/resources"
-      element={
-        <ProtectedRoute allowedRoles={['student']}>
-          <SavedResourcesPage />
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/student/settings"
-      element={
-        <ProtectedRoute allowedRoles={['student']}>
-          <SettingsPage />
-        </ProtectedRoute>
-      }
-    />
+    >
+      <Route index element={<StudentDashboardHome />} />
+      <Route path="dashboard" element={<StudentDashboardHome />} />
+      <Route path="ai-notes" element={<AINotesPage />} />
+      <Route path="summary-history" element={<SummaryHistoryPage />} />
+      <Route path="ai-tools" element={<AIToolsPage />} />
+      <Route path="resume" element={<ResumeBuilderPage />} />
+      <Route path="placement" element={<PlacementPrepPage />} />
+      <Route path="videos" element={<VideoLearningPage />} />
+      <Route path="resources" element={<SavedResourcesPage />} />
+      <Route path="settings" element={<SettingsPage />} />
+    </Route>
 
     {/* Marketplace Routes */}
     <Route

@@ -61,6 +61,25 @@ export const createPortfolio = async (payload: Omit<PortfolioItem, '_id' | 'crea
   return response.data.portfolio;
 };
 
+export type FreelancerDashboardSummary = {
+  totalServices: number;
+  activeServices: number;
+  portfolioCount: number;
+  totalProjects: number;
+  completedProjects: number;
+  inProgressProjects: number;
+  submittedProjects: number;
+  totalEarnings: number;
+  pendingRevenue: number;
+  averageRating: number;
+  totalReviews: number;
+};
+
+export const fetchFreelancerDashboard = async () => {
+  const response = await apiClient.get<{ dashboard: FreelancerDashboardSummary }>('/auth/freelancer-dashboard');
+  return response.data.dashboard;
+};
+
 export const updatePortfolio = async (id: string, payload: Partial<PortfolioItem>) => {
   const response = await apiClient.put<{ portfolio: PortfolioItem }>(`/portfolio/${id}`, payload);
   return response.data.portfolio;

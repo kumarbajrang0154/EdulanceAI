@@ -123,6 +123,7 @@ export const updateServiceRequest = async (req, res, next) => {
           serviceId: service.id,
           title: `Project for ${service.title}`,
           description: request.message,
+          servicePrice: service.price,
           status: 'Accepted',
         });
       }

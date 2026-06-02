@@ -1,4 +1,7 @@
 import User from '../models/User.js';
+import Note from '../models/Note.js';
+import SavedResource from '../models/SavedResource.js';
+import Resume from '../models/Resume.js';
 
 export const getStudentProfile = async (req, res, next) => {
   try {
@@ -28,10 +31,16 @@ export const getStudentDashboardStats = async (req, res, next) => {
       return res.status(403).json({ message: 'Access denied. Only students can access this resource.' });
     }
 
+      const [savedResourcesCount, aiCount, resumeCount] = await Promise.all([
+      SavedResource.countDocuments({ user: user._id }),
+      Note.countDocuments({ studentId: user._id, status: 'completed' }),
+      Resume.countDocuments({ userId: user._id }),
+    ]);
+
     const stats = {
-      resourcesSaved: user.stats?.resourcesSaved || 0,
-      aiUsageCount: user.stats?.aiUsageCount || 0,
-      resumeCount: user.stats?.resumeCount || 0,
+      resourcesSaved: savedResourcesCount,
+      aiUsageCount: aiCount,
+      resumeCount,
       videosWatched: user.stats?.videosWatched || 0,
       joinedDate: user.joinedDate,
       lastActivity: user.updatedAt,

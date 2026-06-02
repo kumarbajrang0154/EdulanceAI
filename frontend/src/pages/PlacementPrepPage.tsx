@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { DashboardLayout, DashboardHeader, SectionTitle } from '../components/dashboard';
+import Alert from '../components/Alert';
 import {
   getPlacementProgress,
   getPlacementResources,
@@ -17,6 +18,7 @@ const PlacementPrepPage = () => {
   const [progress, setProgress] = useState<PlacementProgress[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedType, setSelectedType] = useState('All');
+  const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const roadmapProgressMap = useMemo(
     () => new Map(progress.map((item) => [item.roadmap._id, item])),
@@ -26,6 +28,7 @@ const PlacementPrepPage = () => {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
+      setStatusMessage(null);
       try {
         const [roadmapsData, resourcesData, progressData] = await Promise.all([
           getPlacementRoadmaps(),
@@ -36,6 +39,11 @@ const PlacementPrepPage = () => {
         setRoadmaps(roadmapsData.roadmaps);
         setResources(resourcesData.resources);
         setProgress(progressData.progress);
+      } catch (err: unknown) {
+        setStatusMessage({
+          type: 'error',
+          message: err instanceof Error ? err.message : 'Unable to load placement resources',
+        });
       } finally {
         setLoading(false);
       }
@@ -46,11 +54,18 @@ const PlacementPrepPage = () => {
 
   const handleStartRoadmap = async (roadmapId: string) => {
     setLoading(true);
+    setStatusMessage(null);
     try {
       const { progress: updated } = await updatePlacementProgress({ roadmapId, completedSteps: [1] });
       setProgress((prev) => {
         const existing = prev.filter((item) => item.roadmap._id !== updated.roadmap._id);
         return [...existing, updated];
+      });
+      setStatusMessage({ type: 'success', message: 'Roadmap progress updated successfully.' });
+    } catch (err: unknown) {
+      setStatusMessage({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Unable to update roadmap progress',
       });
     } finally {
       setLoading(false);
@@ -59,8 +74,15 @@ const PlacementPrepPage = () => {
 
   const handleSaveResource = async (resourceId: string) => {
     setLoading(true);
+    setStatusMessage(null);
     try {
       await saveResource(resourceId);
+      setStatusMessage({ type: 'success', message: 'Resource saved to your library.' });
+    } catch (err: unknown) {
+      setStatusMessage({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Unable to save resource',
+      });
     } finally {
       setLoading(false);
     }
@@ -127,6 +149,10 @@ const PlacementPrepPage = () => {
             })}
           </div>
         </section>
+
+        {statusMessage && (
+          <Alert message={statusMessage.message} variant={statusMessage.type} />
+        )}
 
         <section>
           <SectionTitle

@@ -4,9 +4,10 @@ interface StatsCardProps {
   description: string;
   icon: string;
   trend?: 'up' | 'down' | 'neutral';
+  loading?: boolean;
 }
 
-const StatsCard = ({ title, value, description, icon, trend = 'neutral' }: StatsCardProps) => {
+const StatsCard = ({ title, value, description, icon, trend = 'neutral', loading = false }: StatsCardProps) => {
   const trendColor = {
     up: 'text-green-600',
     down: 'text-red-600',
@@ -19,7 +20,9 @@ const StatsCard = ({ title, value, description, icon, trend = 'neutral' }: Stats
         <div className="flex-1">
           <p className="text-xs uppercase tracking-wide text-slate-500 font-medium">{title}</p>
           <div className="mt-3 flex items-baseline gap-2">
-            <p className="text-3xl font-bold text-slate-900">{value}</p>
+            <p className="text-3xl font-bold text-slate-900">
+              {loading ? <span className="inline-block h-8 w-16 rounded-lg bg-slate-200 animate-pulse" /> : value}
+            </p>
           </div>
           <p className={`mt-2 text-sm ${trendColor}`}>{description}</p>
         </div>

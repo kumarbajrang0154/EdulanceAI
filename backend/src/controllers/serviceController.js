@@ -69,7 +69,9 @@ export const getServices = async (req, res, next) => {
       sort = { price: -1 };
     }
 
-    const services = await Service.find(query).sort(sort);
+    const services = await Service.find(query)
+      .sort(sort)
+      .populate('userId', 'fullName profileImage role');
     res.json({ services });
   } catch (error) {
     next(error);
@@ -78,7 +80,7 @@ export const getServices = async (req, res, next) => {
 
 export const getServiceById = async (req, res, next) => {
   try {
-    const service = await Service.findById(req.params.id);
+    const service = await Service.findById(req.params.id).populate('userId', 'fullName profileImage role');
     if (!service) {
       return res.status(404).json({ message: 'Service not found' });
     }

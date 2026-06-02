@@ -2,6 +2,9 @@ import PlacementRoadmap from '../models/PlacementRoadmap.js';
 import PlacementResource from '../models/PlacementResource.js';
 import StudentProgress from '../models/StudentProgress.js';
 import SavedResource from '../models/SavedResource.js';
+import VideoContent from '../models/VideoContent.js';
+import User from '../models/User.js';
+import { logActivity } from '../services/activityService.js';
 
 const defaultRoadmaps = [
   {
@@ -71,6 +74,31 @@ const defaultResources = [
   },
 ];
 
+const defaultVideos = [
+  {
+    title: 'Interview Prep Essentials',
+    description: 'Step-by-step placement interview preparation with live examples.',
+    url: 'https://www.youtube.com/watch?v=example1',
+    category: 'Interview',
+    tags: ['interview', 'confidence', 'strategy'],
+    featured: true,
+  },
+  {
+    title: 'System Design Fundamentals',
+    description: 'Build scalable architecture and understand design tradeoffs.',
+    url: 'https://www.youtube.com/watch?v=example2',
+    category: 'System Design',
+    tags: ['system design', 'architecture', 'scalability'],
+  },
+  {
+    title: 'Frontend Roadmap for Placements',
+    description: 'A practical frontend learning path for modern placement roles.',
+    url: 'https://www.youtube.com/watch?v=example3',
+    category: 'Frontend',
+    tags: ['react', 'frontend', 'javascript'],
+  },
+];
+
 const seedRoadmaps = async () => {
   const count = await PlacementRoadmap.countDocuments();
   if (count === 0) {
@@ -85,6 +113,14 @@ const seedResources = async () => {
     return PlacementResource.create(defaultResources);
   }
   return PlacementResource.find();
+};
+
+const seedVideoContent = async () => {
+  const count = await VideoContent.countDocuments();
+  if (count === 0) {
+    return VideoContent.create(defaultVideos);
+  }
+  return VideoContent.find();
 };
 
 export const getPlacementRoadmaps = async (req, res, next) => {
@@ -138,7 +174,7 @@ export const getPlacementResources = async (req, res, next) => {
 
 export const getSavedResources = async (req, res, next) => {
   try {
-    const savedResources = await SavedResource.find({ user: req.user.id }).populate('resource');
+    const savedResources = await SavedResource.find({ user: req.user.id }).populate('resource').lean();
     res.json({ savedResources });
   } catch (err) {
     next(err);
@@ -163,6 +199,9 @@ export const addSavedResource = async (req, res, next) => {
     }
 
     const savedResource = await SavedResource.create({ user: req.user.id, resource: resourceId, notes: notes || '' });
+    await User.findByIdAndUpdate(req.user.id, { $inc: { 'stats.resourcesSaved': 1 } });
+    await logActivity({ userId: req.user.id, activityType: 'saved_resource', metadata: { resourceId } });
+
     res.status(201).json({ savedResource });
   } catch (err) {
     next(err);
@@ -192,8 +231,43 @@ const getProgressStatus = (roadmap, completedSteps) => {
 
 export const getPlacementProgress = async (req, res, next) => {
   try {
-    const progress = await StudentProgress.find({ user: req.user.id }).populate('roadmap');
+    const progress = await StudentProgress.find({ user: req.user.id }).populate('roadmap').lean();
     res.json({ progress });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getVideoLibrary = async (req, res, next) => {
+  try {
+    const videos = await seedVideoContent();
+    const publishedVideos = videos
+      .filter((video) => video.status === 'published')
+      .sort((a, b) => Number(b.featured) - Number(a.featured));
+
+    res.json({ videos: publishedVideos });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const watchVideo = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const video = await VideoContent.findByIdAndUpdate(
+      id,
+      { $inc: { views: 1 } },
+      { new: true },
+    );
+
+    if (!video) {
+      return res.status(404).json({ message: 'Video not found' });
+    }
+
+    await User.findByIdAndUpdate(req.user.id, { $inc: { 'stats.videosWatched': 1 } });
+    await logActivity({ userId: req.user.id, activityType: 'video_watched', metadata: { videoId: video._id, title: video.title } });
+
+    res.json({ video });
   } catch (err) {
     next(err);
   }

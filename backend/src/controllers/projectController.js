@@ -31,6 +31,7 @@ export const createProject = async (req, res, next) => {
       serviceId,
       title,
       description,
+      servicePrice: service.price,
       deadline: deadline ? new Date(deadline) : undefined,
       status: 'Pending',
     });
@@ -81,6 +82,10 @@ export const updateProjectStatus = async (req, res, next) => {
     }
 
     project.status = status;
+    if (status === 'Completed') {
+      project.completedAt = new Date();
+      project.paymentStatus = 'pending';
+    }
     if (Array.isArray(submittedFiles) && submittedFiles.length) {
       project.submittedFiles = [...project.submittedFiles, ...submittedFiles];
     }

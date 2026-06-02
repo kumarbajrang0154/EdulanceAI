@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { DashboardLayout, DashboardHeader, SectionTitle } from '../components/dashboard';
+import Alert from '../components/Alert';
 import {
   deleteSavedResource,
   getSavedResources,
@@ -9,13 +10,17 @@ import {
 const SavedResourcesPage = () => {
   const [savedResources, setSavedResources] = useState<SavedResource[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'All' | 'article' | 'video' | 'document' | 'guide' | 'practice'>('All');
 
   const loadSavedResources = async () => {
     setLoading(true);
+    setError(null);
     try {
       const { savedResources } = await getSavedResources();
       setSavedResources(savedResources);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Unable to load saved resources');
     } finally {
       setLoading(false);
     }
@@ -65,6 +70,8 @@ const SavedResourcesPage = () => {
             description="Access saved articles, documents, videos, and study guides."
           />
 
+          {error && <Alert message={error} variant="error" />}
+
           <div className="mb-6 flex flex-wrap gap-2">
             {['All', 'article', 'video', 'document', 'guide', 'practice'].map((option) => (
               <button
@@ -82,7 +89,11 @@ const SavedResourcesPage = () => {
             ))}
           </div>
 
-          {filteredResources.length === 0 ? (
+          {loading ? (
+            <article className="rounded-2xl border border-slate-200 bg-white p-8 text-center">
+              <p className="text-slate-600">Loading saved resources…</p>
+            </article>
+          ) : filteredResources.length === 0 ? (
             <article className="rounded-2xl border border-slate-200 bg-white p-8 text-center">
               <p className="text-2xl mb-2">💾</p>
               <p className="text-slate-600">No saved resources yet.</p>

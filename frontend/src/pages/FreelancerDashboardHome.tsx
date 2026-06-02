@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { fetchFreelancerProfile, fetchPortfolio, fetchServices, FreelancerProfile } from '../services/freelancer';
+import { fetchFreelancerProfile, fetchFreelancerDashboard, fetchPortfolio, fetchServices, FreelancerDashboardSummary, FreelancerProfile } from '../services/freelancer';
 import {
   fetchProposalHistory,
   fetchPricingHistory,
@@ -16,8 +16,7 @@ import SkillsSection from '../components/dashboard/SkillsSection';
 const FreelancerDashboardHome = () => {
   const { user } = useAuth();
   const [profile, setProfile] = useState<FreelancerProfile | null>(null);
-  const [portfolioCount, setPortfolioCount] = useState(0);
-  const [serviceCount, setServiceCount] = useState(0);
+  const [dashboard, setDashboard] = useState<FreelancerDashboardSummary | null>(null);
   const [proposalCount, setProposalCount] = useState(0);
   const [pricingCount, setPricingCount] = useState(0);
   const [latestProposal, setLatestProposal] = useState<ProposalHistoryItem | null>(null);
@@ -33,17 +32,10 @@ const FreelancerDashboardHome = () => {
       }
 
       try {
-        const projects = await fetchPortfolio();
-        setPortfolioCount(projects.length);
+        const summary = await fetchFreelancerDashboard();
+        setDashboard(summary);
       } catch {
-        setPortfolioCount(0);
-      }
-
-      try {
-        const services = await fetchServices();
-        setServiceCount(services.length);
-      } catch {
-        setServiceCount(0);
+        setDashboard(null);
       }
 
       try {
@@ -69,10 +61,10 @@ const FreelancerDashboardHome = () => {
   }, []);
 
   const stats = [
-    { label: 'Services', value: String(serviceCount), description: 'Active service offerings in your catalog.' },
-    { label: 'Portfolio', value: String(portfolioCount), description: 'Published portfolio entries ready for clients.' },
-    { label: 'Projects', value: '12', description: 'Ongoing and completed freelance engagements.' },
-    { label: 'Earnings', value: '$8.7k', description: 'Estimated monthly revenue from active gigs.' },
+    { label: 'Services', value: String(dashboard?.totalServices ?? 0), description: 'Active service offerings in your catalog.' },
+    { label: 'Portfolio', value: String(dashboard?.portfolioCount ?? 0), description: 'Published portfolio entries ready for clients.' },
+    { label: 'Projects', value: String(dashboard?.totalProjects ?? 0), description: 'Ongoing and completed freelance engagements.' },
+    { label: 'Earnings', value: `$${dashboard?.totalEarnings.toLocaleString() ?? '0'}`, description: 'Total revenue from completed work.' },
   ];
 
   return (
@@ -127,7 +119,11 @@ const FreelancerDashboardHome = () => {
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-6">
           <ProfileCard showEditButton />
-          <EarningsOverview />
+          <EarningsOverview
+            totalEarnings={dashboard?.totalEarnings ?? 0}
+            completedProjects={dashboard?.completedProjects ?? 0}
+            pendingRevenue={dashboard?.pendingRevenue ?? 0}
+          />
         </div>
         <div className="space-y-6">
           <SkillsSection skills={profile?.skills ?? []} />

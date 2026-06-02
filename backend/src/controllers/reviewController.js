@@ -1,4 +1,5 @@
 import Review from '../models/Review.js';
+import Project from '../models/Project.js';
 import { createNotification } from '../services/notificationService.js';
 import { logActivity } from '../services/activityService.js';
 
@@ -8,6 +9,18 @@ export const createReview = async (req, res, next) => {
 
     if (!targetUserId || !rating || !comment) {
       return res.status(400).json({ message: 'targetUserId, rating, and comment are required.' });
+    }
+
+    if (reviewType === 'freelancer') {
+      const completedProject = await Project.exists({
+        clientId: req.user.id,
+        freelancerId: targetUserId,
+        status: 'Completed',
+      });
+
+      if (!completedProject) {
+        return res.status(403).json({ message: 'You can only review a freelancer after completing a project with them.' });
+      }
     }
 
     const review = await Review.create({

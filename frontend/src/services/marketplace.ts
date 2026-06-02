@@ -2,7 +2,7 @@ import apiClient from './axios';
 import { ServiceItem, FreelancerProfile } from './freelancer';
 
 export type MarketplaceServiceItem = ServiceItem & {
-  userId: string;
+  userId: string | { _id: string; fullName: string; profileImage?: string };
   status: string;
   features: string[];
   revisions: number;

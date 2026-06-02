@@ -10,6 +10,8 @@ import {
   removeSavedResource,
   getPlacementProgress,
   updatePlacementProgress,
+  getVideoLibrary,
+  watchVideo,
 } from '../controllers/placementController.js';
 
 const router = express.Router();
@@ -24,5 +26,7 @@ router.post('/saved', addSavedResource);
 router.delete('/saved/:id', removeSavedResource);
 router.get('/progress', getPlacementProgress);
 router.put('/progress', updatePlacementProgress);
+router.get('/videos', getVideoLibrary);
+router.post('/videos/watch/:id', watchVideo);
 
 export default router;

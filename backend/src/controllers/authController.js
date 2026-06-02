@@ -1,4 +1,8 @@
 import User from '../models/User.js';
+import Service from '../models/Service.js';
+import Portfolio from '../models/Portfolio.js';
+import Project from '../models/Project.js';
+import Review from '../models/Review.js';
 import { buildJwtToken } from '../services/jwtService.js';
 import { validateSignup, validateLogin } from '../utils/validate.js';
 
@@ -79,7 +83,45 @@ export const studentDashboard = async (req, res) => {
 };
 
 export const freelancerDashboard = async (req, res) => {
-  res.json({ message: 'Freelancer dashboard access granted', user: req.user });
+  const userId = req.user.id;
+  const [services, activeServices, portfolios, projects, reviews] = await Promise.all([
+    Service.countDocuments({ userId }),
+    Service.countDocuments({ userId, status: 'Active' }),
+    Portfolio.countDocuments({ userId }),
+    Project.find({ freelancerId: userId }).lean(),
+    Review.find({ targetUserId: userId, status: 'visible' }).lean(),
+  ]);
+
+  const totalEarnings = projects
+    .filter((project) => project.status === 'Completed')
+    .reduce((sum, project) => sum + (project.servicePrice || 0), 0);
+
+  const pendingRevenue = projects
+    .filter((project) => ['Accepted', 'In Progress', 'Submitted'].includes(project.status))
+    .reduce((sum, project) => sum + (project.servicePrice || 0), 0);
+
+  const completedProjects = projects.filter((project) => project.status === 'Completed').length;
+  const inProgressProjects = projects.filter((project) => project.status === 'In Progress').length;
+  const submittedProjects = projects.filter((project) => project.status === 'Submitted').length;
+
+  const averageRating = reviews.length > 0 ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length : 0;
+
+  res.json({
+    user: req.user,
+    dashboard: {
+      totalServices: services,
+      activeServices,
+      portfolioCount: portfolios,
+      totalProjects: projects.length,
+      completedProjects,
+      inProgressProjects,
+      submittedProjects,
+      totalEarnings,
+      pendingRevenue,
+      averageRating: Number(averageRating.toFixed(2)),
+      totalReviews: reviews.length,
+    },
+  });
 };
 
 export const adminDashboard = async (req, res) => {
